@@ -158,9 +158,7 @@ def decriptar_descargar(key1,destino):
 def generar_clave_dome(key):
     try: 
         dome= AESDome('','')
-        clave=dome.generarClave(key)
-        with open("clave.key","wb") as archivo_clave:
-            archivo_clave.write(clave)
+        clave=dome.generar_clave(key)
         return clave
     except Exception as ex:
         print(ex.args)
@@ -182,7 +180,8 @@ def encriptar_archivo_aes_dome(ubicacion,nom_archivo,clave):
             file_out.close()
             return new_url
         else:
-            os.remove(ubicacion+"/"+nom_archivo)
+            # os.remove(ubicacion+"/"+nom_archivo)
+            print(encrypted_data)
             return encrypted_data
 
     except Exception as ex:
@@ -193,13 +192,14 @@ def desencriptar_archivo_aes_dome(nom_archivo,clave) :
     try:
         file_in= open(nom_archivo,"rb")
         iv= file_in.read(16) 
+        # iv=''
         encrypted_info=file_in.read()
         file_in.close()
         aes_dome=AESDome(clave,iv)
         decrypted_data=aes_dome.desencritar(encrypted_info)
         
         # print(type(decrypted_data).__name__)
-        if type(decrypted_data).__name__ =='bytes':
+        if type(decrypted_data).__name__ =='str':
             file_out=open(nom_archivo,"wb")
             file_out.write(decrypted_data)
             file_out.close()
