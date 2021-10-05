@@ -22,7 +22,8 @@ def descargar(event,cotext):
 
 # Funciones para encriptar
 def transferirLocalBoto(key,origin_disc)-> list:
-
+    ubicacionMensaje="error.handler.transferirLocalBoto"
+    errorMensaje="error"
     # iniciamos la funcion para conectar al bucket s3
     s3 = boto3.client('s3', endpoint_url=ENDPOINT_URL,
             aws_access_key_id = AWS_ACCESS_KEY_ID,
@@ -32,10 +33,10 @@ def transferirLocalBoto(key,origin_disc)-> list:
         bucket=BUCKET
         s3.head_bucket(Bucket=bucket)
         if not isinstance(boto3.client('s3'), botocore.client.BaseClient):
-            return {"status": "error", "message":"error.handler.descargar_local_boto3", "messageDetail":"Error en la conexion"}
+            return {"status": errorMensaje, "message":ubicacionMensaje, "messageDetail":"Error en la conexion"}
         
         if not os.path.isdir(origin_disc):
-            return {"status": "error", "message":"error.handler.transferir_local_boto3", "messageDetail":"La carpeta de origen ("+origin_disc+") no existe."}
+            return {"status": errorMensaje, "message":"error.handler.transferir_local_boto3", "messageDetail":"La carpeta de origen ("+origin_disc+") no existe."}
         
         else:
             # generamos el hash con la clave
@@ -45,7 +46,7 @@ def transferirLocalBoto(key,origin_disc)-> list:
             # obtenemos los archivos de la carpeta de origen y recorremos para subir al bucket s3
             contenidos=os.listdir(origin_disc)
             if len(contenidos)==0:
-                return {"status": "error", "message":"error.handler.transferir_local_boto3", "messageDetail":"No se encontraron archivos para subir en el origen({})".format(origin_disc)}
+                return {"status": errorMensaje, "message":"error.handler.transferir_local_boto3", "messageDetail":"No se encontraron archivos para subir en el origen({})".format(origin_disc)}
                 
             lista_archivos_no_subidos=[]
             for elemento in contenidos:
@@ -69,31 +70,33 @@ def transferirLocalBoto(key,origin_disc)-> list:
     
     except  botocore.exceptions.ConnectionError as ex:
         # print(ex)
-        return {"status": "error", "message": "error.handler.descargar_local_boto3", "messageDetail":"Error de conexion"}
+        return {"status": errorMensaje, "message": ubicacionMensaje, "messageDetail":"Error de conexion"}
     
     except  botocore.exceptions.NoCredentialsError as ex:
         # print(ex)
-        return {"status": "error", "message": "error.handler.descargar_local_boto3", "messageDetail":"Error de credenciales"}
+        return {"status": errorMensaje, "message": ubicacionMensaje, "messageDetail":"Error de credenciales"}
     
     except  s3.exceptions.NoSuchBucket as ex:
-        return {"status": "error", "message": "error.handler.descargar_local_boto3", "messageDetail":"El bucket({}) no existe".format(BUCKET)}
+        return {"status": errorMensaje, "message": ubicacionMensaje, "messageDetail":"El bucket({}) no existe".format(BUCKET)}
     
     except  s3.exceptions.NoSuchKey as ex:
-        return {"status": "error", "message": "error.handler.descargar_local_boto3", "messageDetail":"No se encontro el archivo en el bucket({})".format(BUCKET)}
+        return {"status": errorMensaje, "message": ubicacionMensaje, "messageDetail":"No se encontro el archivo en el bucket({})".format(BUCKET)}
     
     except botocore.exceptions.ClientError as e:
         error_code = int(e.response['Error']['Code'])
         if error_code == 403:
-            return {"status": "error", "message": "error.handler.descargar_local_boto3", "messageDetail":"El bucket({}) esta en modo privado".format(BUCKET)}
+            return {"status": errorMensaje, "message": ubicacionMensaje, "messageDetail":"El bucket({}) esta en modo privado".format(BUCKET)}
     
         elif error_code == 404:
-            return {"status": "error", "message": "error.handler.descargar_local_boto3", "messageDetail":"El bucket({}) no existe".format(BUCKET)}
+            return {"status": errorMensaje, "message": ubicacionMensaje, "messageDetail":"El bucket({}) no existe".format(BUCKET)}
     
     except Exception as ex:
         print(ex.args)
-        return {"status": "error", "message": "error.handler.transferir_local_boto3", "messageDetail":ex.args}
+        return {"status": errorMensaje, "message": "error.handler.transferir_local_boto3", "messageDetail":ex.args}
 
 def descargarLocalBoto(key1,destino):
+    ubicacionMensaje="error.handler.descargarLocalBoto"
+    errorMensaje="error"
     s3 = boto3.client('s3', endpoint_url=ENDPOINT_URL,
             aws_access_key_id = AWS_ACCESS_KEY_ID,
             aws_secret_access_key = AWS_SECRET_ACCESS_KEY,
@@ -107,15 +110,15 @@ def descargarLocalBoto(key1,destino):
         bucket=BUCKET
         s3.head_bucket(Bucket=bucket)
         if not isinstance(boto3.client('s3'), botocore.client.BaseClient):
-            return {"status": "success", "message":"success.handler.descargar_local_boto3", "messageDetail":"Error en la conexion"}
+            return {"status": errorMensaje, "message":ubicacionMensaje, "messageDetail":"Error en la conexion"}
             
         if not os.path.isdir(destino):
-            return {"status": "success", "message":"success.handler.descargar_local_boto3", "messageDetail":"La carpeta de destino ("+destino+") no existe."}
+            return {"status": errorMensaje, "message":ubicacionMensaje, "messageDetail":"La carpeta de destino ("+destino+") no existe."}
     
         else:
             list=s3.list_objects(Bucket=bucket)['Contents']
             if len(list)==0:
-                return {"status": "success", "message":"success.handler.descargar_local_boto3", "messageDetail":"No se encontraron archivos para descargar del bucket({})".format(bucket)}
+                return {"status": errorMensaje, "message":ubicacionMensaje, "messageDetail":"No se encontraron archivos para descargar del bucket({})".format(bucket)}
            
             lista_archivos_erroneos=[]
             for key in list:
@@ -131,34 +134,34 @@ def descargarLocalBoto(key1,destino):
     
     except  botocore.exceptions.ConnectionError as ex:
         print(ex)
-        return {"status": "error", "message": "error.handler.descargar_local_boto3", "messageDetail":"Error de conexion"}
+        return {"status": errorMensaje, "message": ubicacionMensaje, "messageDetail":"Error de conexion"}
 
     except  botocore.exceptions.NoCredentialsError as ex:
         print(ex)
-        return {"status": "error", "message": "error.handler.descargar_local_boto3", "messageDetail":"Error de credenciales"}
+        return {"status": errorMensaje, "message": ubicacionMensaje, "messageDetail":"Error de credenciales"}
     
     except  s3.exceptions.NoSuchBucket as ex:
-        return {"status": "error", "message": "error.handler.descargar_local_boto3", "messageDetail":"El bucket({}) no existe".format(BUCKET)}
+        return {"status": errorMensaje, "message": ubicacionMensaje, "messageDetail":"El bucket({}) no existe".format(BUCKET)}
     
     except  s3.exceptions.NoSuchKey as ex:
-        return {"status": "error", "message": "error.handler.descargar_local_boto3", "messageDetail":"No se encontro el archivo en el bucket({})".format(BUCKET)}
+        return {"status": errorMensaje, "message": ubicacionMensaje, "messageDetail":"No se encontro el archivo en el bucket({})".format(BUCKET)}
     
     except botocore.exceptions.ClientError as e:
         error_code = int(e.response['Error']['Code'])
         if error_code == 403:
-            return {"status": "error", "message": "error.handler.descargar_local_boto3", "messageDetail":"El bucket({}) esta en modo privado".format(BUCKET)}
+            return {"status": errorMensaje, "message": ubicacionMensaje, "messageDetail":"El bucket({}) esta en modo privado".format(BUCKET)}
     
         elif error_code == 404:
-            return {"status": "error", "message": "error.handler.descargar_local_boto3", "messageDetail":"El bucket({}) no existe".format(BUCKET)}
+            return {"status": errorMensaje, "message": ubicacionMensaje, "messageDetail":"El bucket({}) no existe".format(BUCKET)}
     
     except Exception as ex:
         # return ex
-        return {"status": "error", "message": "error.handler.descargar_local_boto3", "messageDetail":ex.args}
+        return {"status": errorMensaje, "message": ubicacionMensaje, "messageDetail":ex.args}
 
 def generar_claveDome(key):
     try: 
         dome= AESDome('','')
-        clave=dome.generarKey(key)
+        clave=dome.generarClave(key)
         with open("clave.key","wb") as archivo_clave:
             archivo_clave.write(clave)
         return clave
