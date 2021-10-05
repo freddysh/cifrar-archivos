@@ -168,16 +168,16 @@ def generar_clave_dome(key):
 
 def encriptar_archivo_aes_dome(ubicacion,nom_archivo,clave):
     try:
-        aesDome=AESDome(clave,'')
+        aes_dome=AESDome(clave,'')
         file=open(ubicacion+"/"+nom_archivo,"rb")
         archivo_info=file.read()
         file.close()    
-        encrypted_data=aesDome.encritar(archivo_info)
+        encrypted_data=aes_dome.encritar(archivo_info)
         if type(encrypted_data).__name__ =='bytes':
             new_url=datetime.datetime.now().strftime("%d-%m-%Y_%H:%M:%S")
             new_url=str(new_url+"_"+nom_archivo)
             file_out=open(ubicacion+"/"+new_url,"wb")
-            file_out.write(aesDome.iv)
+            file_out.write(aes_dome.iv)
             file_out.write(encrypted_data)
             file_out.close()
             return new_url
@@ -195,8 +195,8 @@ def desencriptar_archivo_aes_dome(nom_archivo,clave) :
         iv= file_in.read(16) 
         encrypted_info=file_in.read()
         file_in.close()
-        aesDome=AESDome(clave,iv)
-        decrypted_data=aesDome.desencritar(encrypted_info)
+        aes_dome=AESDome(clave,iv)
+        decrypted_data=aes_dome.desencritar(encrypted_info)
         
         # print(type(decrypted_data).__name__)
         if type(decrypted_data).__name__ =='bytes':
