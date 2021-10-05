@@ -29,7 +29,7 @@ def encriptar_transferir(key,origin_disc):
             aws_access_key_id = AWS_ACCESS_KEY_ID,
             aws_secret_access_key = AWS_SECRET_ACCESS_KEY,
             region_name=REGION_NAME)
-    mensaje_error_bucket="bucket"
+    
     try:
         s3.head_bucket(Bucket=BUCKET)
         if not isinstance(boto3.client('s3'), botocore.client.BaseClient):
@@ -75,18 +75,18 @@ def encriptar_transferir(key,origin_disc):
         return {"status": error_mensaje, "message": ubicacion_mensaje, "messageDetail":"Error de credenciales"}
     
     except  s3.exceptions.NoSuchBucket as ex:
-        return {"status": error_mensaje, "message": ubicacion_mensaje, "messageDetail":"El {}({}) no existe".format(mensaje_error_bucket,BUCKET)}
+        return {"status": error_mensaje, "message": ubicacion_mensaje, "messageDetail":"El bucket({}) no existe".format(BUCKET)}
     
     except  s3.exceptions.NoSuchKey as ex:
-        return {"status": error_mensaje, "message": ubicacion_mensaje, "messageDetail":"No se encontro el archivo en el {}({})".format(mensaje_error_bucket,BUCKET)}
+        return {"status": error_mensaje, "message": ubicacion_mensaje, "messageDetail":"No se encontro el archivo en el bucket({})".format(BUCKET)}
     
     except botocore.exceptions.ClientError as e:
         error_code = int(e.response['Error']['Code'])
         if error_code == 403:
-            return {"status": error_mensaje, "message": ubicacion_mensaje, "messageDetail":"El {}({}) esta en modo privado".format(mensaje_error_bucket,BUCKET)}
+            return {"status": error_mensaje, "message": ubicacion_mensaje, "messageDetail":"El bucket({}) esta en modo privado".format(BUCKET)}
     
         elif error_code == 404:
-            return {"status": error_mensaje, "message": ubicacion_mensaje, "messageDetail":"El {}({}) no existe".format(mensaje_error_bucket,BUCKET)}
+            return {"status": error_mensaje, "message": ubicacion_mensaje, "messageDetail":"El bucket({}) no existe".format(BUCKET)}
     
     except Exception as ex:
         print(ex.args)
@@ -99,7 +99,6 @@ def decriptar_descargar(key1,destino):
             aws_access_key_id = AWS_ACCESS_KEY_ID,
             aws_secret_access_key = AWS_SECRET_ACCESS_KEY,
             region_name=REGION_NAME)
-    mensaje_error_bucket="bucket"
     try:
         clave=generar_clave_dome(key1)
         if type(clave).__name__ !='bytes':
@@ -115,7 +114,7 @@ def decriptar_descargar(key1,destino):
         else:
             lista_de_archivos=s3.list_objects(Bucket=BUCKET)['Contents']
             if len(lista_de_archivos)==0:
-                return {"status": error_mensaje, "message":ubicacion_mensaje, "messageDetail":"No se encontraron archivos para descargar del {}({})".format(mensaje_error_bucket,BUCKET)}
+                return {"status": error_mensaje, "message":ubicacion_mensaje, "messageDetail":"No se encontraron archivos para descargar del bucket({})".format(BUCKET)}
            
             lista_archivos_erroneos=[]
             for key in lista_de_archivos:
@@ -139,19 +138,19 @@ def decriptar_descargar(key1,destino):
     
     except  s3.exceptions.NoSuchBucket as ex:
         print(ex)
-        return {"status": error_mensaje, "message": ubicacion_mensaje, "messageDetail":"El {}({}) no existe".format(mensaje_error_bucket,BUCKET)}
+        return {"status": error_mensaje, "message": ubicacion_mensaje, "messageDetail":"El bucket({}) no existe".format(BUCKET)}
     
     except  s3.exceptions.NoSuchKey as ex:
         print(ex)
-        return {"status": error_mensaje, "message": ubicacion_mensaje, "messageDetail":"No se encontro el archivo en el {}({})".format(mensaje_error_bucket,BUCKET)}
+        return {"status": error_mensaje, "message": ubicacion_mensaje, "messageDetail":"No se encontro el archivo en el bucket({})".format(BUCKET)}
     
     except botocore.exceptions.ClientError as e:
         error_code = int(e.response['Error']['Code'])
         if error_code == 403:
-            return {"status": error_mensaje, "message": ubicacion_mensaje, "messageDetail":"El {}({}) esta en modo privado".format(mensaje_error_bucket,BUCKET)}
+            return {"status": error_mensaje, "message": ubicacion_mensaje, "messageDetail":"El bucket({}) esta en modo privado".format(BUCKET)}
     
         elif error_code == 404:
-            return {"status": error_mensaje, "message": ubicacion_mensaje, "messageDetail":"El {}({}) no existe".format(mensaje_error_bucket,BUCKET)}
+            return {"status": error_mensaje, "message": ubicacion_mensaje, "messageDetail":"El bucket({}) no existe".format(BUCKET)}
     
     except Exception as ex:
         print(ex)
