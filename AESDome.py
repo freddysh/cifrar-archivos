@@ -45,27 +45,27 @@ class AESDome:
             # ct_bytes = cipher.encrypt(pad(data, AES.block_size))
             # self.iv = cipher.iv
             # return ct_bytes
-            print("paso 1")
-            BS = AES.block_size
-            print("paso 2")
-            # pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS)
+            # print("paso 1")
+            # BS = AES.block_size
+            # print("paso 2")
+            # # pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS)
 
-            print("paso 3")
+            # print("paso 3")
             # raw = base64.b64encode(pad(data).encode('utf8'))
 
-            print("paso 4")
+            # print("paso 4")
             iv = get_random_bytes(16)
 
-            print("paso 5")
+            # print("paso 5")
             cipher = AES.new(key= self.key, mode= AES.MODE_CFB,iv= iv)
 
-            print("paso 6")
+            # print("paso 6")
             data=cipher.encrypt(pad(data, AES.block_size))
 
-            print("paso 7")
-            print(type(iv).__name__)
-            print(type(data).__name__)
-            # return base64.b64encode(iv +data )
+            # print("paso 7")
+            # print(type(iv).__name__)
+            # print(type(data).__name__)
+            # # return base64.b64encode(iv +data )
             
             self.iv = iv
             return data

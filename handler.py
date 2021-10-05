@@ -199,7 +199,7 @@ def desencriptar_archivo_aes_dome(nom_archivo,clave) :
         decrypted_data=aes_dome.desencritar(encrypted_info)
         
         # print(type(decrypted_data).__name__)
-        if type(decrypted_data).__name__ =='str':
+        if type(decrypted_data).__name__ =='bytes':
             file_out=open(nom_archivo,"wb")
             file_out.write(decrypted_data)
             file_out.close()
