@@ -11,7 +11,7 @@ class AESDome:
         self.key=key
         self.iv=iv
     
-    def generarClave(self,key):
+    def generar_clave(self,key):
         try:
             self.key = hashlib.sha256(key.encode()).digest()
             return self.key

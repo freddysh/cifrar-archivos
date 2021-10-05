@@ -11,18 +11,18 @@ from variables import CLAVE_ENCRYT,BUCKET,ENDPOINT_URL,AWS_ACCESS_KEY_ID,AWS_SEC
 def subir(event,cotext):
     clave=CLAVE_ENCRYT
     origin_disc=DISCO_ORIGEN
-    mensaje=transferirLocalBoto(clave,origin_disc)
+    mensaje=encriptar_transferir(clave,origin_disc)
     return mensaje
 
 def descargar(event,cotext):
     clave=CLAVE_ENCRYT
     destino=DISCO_DESTINO
-    mensaje=descargarLocalBoto(clave,destino)
+    mensaje=decriptar_descargar(clave,destino)
     return mensaje
 
 # Funciones para encriptar
-def transferirLocalBoto(key,origin_disc)-> list:
-    ubicacionMensaje="error.handler.transferirLocalBoto"
+def encriptar_transferir(key,origin_disc):
+    ubicacionMensaje="error.handler.encriptar_transferir"
     errorMensaje="error"
     # iniciamos la funcion para conectar al bucket s3
     s3 = boto3.client('s3', endpoint_url=ENDPOINT_URL,
@@ -36,7 +36,7 @@ def transferirLocalBoto(key,origin_disc)-> list:
             return {"status": errorMensaje, "message":ubicacionMensaje, "messageDetail":"Error en la conexion"}
         
         if not os.path.isdir(origin_disc):
-            return {"status": errorMensaje, "message":"error.handler.transferir_local_boto3", "messageDetail":"La carpeta de origen ("+origin_disc+") no existe."}
+            return {"status": errorMensaje, "message":ubicacionMensaje, "messageDetail":"La carpeta de origen ("+origin_disc+") no existe."}
         
         else:
             # generamos el hash con la clave
@@ -46,7 +46,7 @@ def transferirLocalBoto(key,origin_disc)-> list:
             # obtenemos los archivos de la carpeta de origen y recorremos para subir al bucket s3
             contenidos=os.listdir(origin_disc)
             if len(contenidos)==0:
-                return {"status": errorMensaje, "message":"error.handler.transferir_local_boto3", "messageDetail":"No se encontraron archivos para subir en el origen({})".format(origin_disc)}
+                return {"status": errorMensaje, "message":ubicacionMensaje, "messageDetail":"No se encontraron archivos para subir en el origen({})".format(origin_disc)}
                 
             lista_archivos_no_subidos=[]
             for elemento in contenidos:
@@ -94,8 +94,8 @@ def transferirLocalBoto(key,origin_disc)-> list:
         print(ex.args)
         return {"status": errorMensaje, "message": "error.handler.transferir_local_boto3", "messageDetail":ex.args}
 
-def descargarLocalBoto(key1,destino):
-    ubicacionMensaje="error.handler.descargarLocalBoto"
+def decriptar_descargar(key1,destino):
+    ubicacionMensaje="error.handler.decriptar_descargar"
     errorMensaje="error"
     s3 = boto3.client('s3', endpoint_url=ENDPOINT_URL,
             aws_access_key_id = AWS_ACCESS_KEY_ID,
