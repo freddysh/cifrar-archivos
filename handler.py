@@ -49,9 +49,9 @@ def encriptar_transferir(key,origin_disc):
                 
             lista_archivos_no_subidos=[]
             for elemento in contenidos:
-                    # encriptamos el archivo}
+                    # encriptamos el archivo
                     encripted_archive_url=encriptar_archivoAESDome(origin_disc,elemento,clave)
-                    # print(encripted_archive_url)
+                    
                     if type(encripted_archive_url).__name__=='str':
                     # subimos los archivos al bucker s3
                         s3.upload_file(origin_disc+"/"+encripted_archive_url, BUCKET, encripted_archive_url)
@@ -61,9 +61,7 @@ def encriptar_transferir(key,origin_disc):
                         os.remove(origin_disc+"/"+encripted_archive_url)
                     else:
                         lista_archivos_no_subidos.append({"archivo":elemento,"motivo":"No se encripto el archivo"})
-                        
                 
-
             print("[success.handler.transferir_local_boto3]:archivos encriptados y subidos")
             return {"status": "success", "message":"success.handler.transferir_local_boto3", "messageDetail":"archivos encriptados y subidos","errores":"{}".format(lista_archivos_no_subidos)}
     
@@ -100,7 +98,6 @@ def decriptar_descargar(key1,destino):
             aws_access_key_id = AWS_ACCESS_KEY_ID,
             aws_secret_access_key = AWS_SECRET_ACCESS_KEY,
             region_name=REGION_NAME)
-        
     try:
         clave=generar_claveDome(key1)
         if type(clave).__name__ !='bytes':
