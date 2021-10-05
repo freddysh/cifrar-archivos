@@ -15,9 +15,6 @@ def subir(event,cotext):
     return mensaje
 
 def descargar(event,cotext):
-    # for key, value in sorted(botocore.exceptions.__dict__.items()):
-    #     if isinstance(value, type):
-    #         print(key)
     clave=CLAVE_ENCRYT
     temp_disc=DISCO_DESTINO
     mensaje=descargar_local_boto3(clave,temp_disc)
@@ -34,7 +31,6 @@ def transferir_local_boto3(key,pathOrigin)-> list:
     try:
         bucket=BUCKET
         s3.head_bucket(Bucket=bucket)
-        # list=s3.list_objects(Bucket=bucket)['Contents']
         if not isinstance(boto3.client('s3'), botocore.client.BaseClient):
             return {"status": "error", "message":"error.handler.descargar_local_boto3", "messageDetail":"Error en la conexion"}
         
@@ -51,33 +47,23 @@ def transferir_local_boto3(key,pathOrigin)-> list:
             if len(contenidos)==0:
                 return {"status": "error", "message":"error.handler.transferir_local_boto3", "messageDetail":"No se encontraron archivos para subir en el origen({})".format(pathOrigin)}
                 
-            hubo_error=False
-            rpt=True
             lista_archivos_no_subidos=[]
             for elemento in contenidos:
-                # if not hubo_error:
                     # encriptamos el archivo}
                     encripted_archive_url=encriptar_archivoAESDome(pathOrigin,elemento,clave)
                     # print(encripted_archive_url)
                     if type(encripted_archive_url).__name__=='str':
                     # subimos los archivos al bucker s3
                         s3.upload_file(pathOrigin+"/"+encripted_archive_url, bucket, encripted_archive_url)
-                        
                         results = s3.list_objects(Bucket=bucket, Prefix=encripted_archive_url)
-                        # se_subio = list(bucket_temp.objects.filter(Prefix=encripted_archive_url))
                         if 'Contents' not in results:
                             lista_archivos_no_subidos.append({"archivo":elemento,"motivo":"No se subio el archivo"})
                         os.remove(pathOrigin+"/"+encripted_archive_url)
                     else:
                         lista_archivos_no_subidos.append({"archivo":elemento,"motivo":"No se encripto el archivo"})
-                        # rpt= encripted_archive_url
-                        # hubo_error=True
-                        # break
-                # borramos el archivo temporal
+                        
+                
 
-            # if hubo_error:
-            #      return rpt
-            # else:
             print("[success.handler.transferir_local_boto3]:archivos encriptados y subidos")
             return {"status": "success", "message":"success.handler.transferir_local_boto3", "messageDetail":"archivos encriptados y subidos","errores":"{}".format(lista_archivos_no_subidos)}
     
@@ -127,29 +113,19 @@ def descargar_local_boto3(key1,destino):
             return {"status": "success", "message":"success.handler.descargar_local_boto3", "messageDetail":"La carpeta de destino ("+destino+") no existe."}
     
         else:
-            list=s3.list_objects(Bucket=bucket)['Contents']
-            if len(list)==0:
+            if len(s3.list_objects(Bucket=bucket)['Contents'])==0:
                 return {"status": "success", "message":"success.handler.descargar_local_boto3", "messageDetail":"No se encontraron archivos para descargar del bucket({})".format(bucket)}
-            # hubo_error=False
-            # rpt=True
+           
             lista_archivos_erroneos=[]
             for key in list:
-                # if not hubo_error:
                     s3.download_file(bucket, key['Key'], destino+key['Key'])
                     if os.path.isfile(destino+key['Key']):
                         rpt=desencriptar_archivoAESDome(destino+key['Key'],clave)
                         if rpt is not True:
-                            # os.remove(destino+key['Key'])
-                            # hubo_error=True
-                            # break
                             lista_archivos_erroneos.append({"archivo":key['Key'],"motivo":"El archivo se descargo, pero no se desencripto(archivo corrupto o contrasenia invalida)"})                 
                     else:
                         lista_archivos_erroneos.append({"archivo":key['Key'],"motivo":"El archivo no se descargo"})
-                        # raise Exception("No existe el archivo en({0})".format(destino+'/'+key['key']) )
-            # if hubo_error:
-            #      return rpt
-
-            # else:
+            
             return {"status": "success", "message":"success.handler.descargar_local_boto3", "messageDetail":"archivos descargados","errores":"{}".format(lista_archivos_erroneos)}
     
     except  botocore.exceptions.ConnectionError as ex:
@@ -231,31 +207,5 @@ def desencriptar_archivoAESDome(nom_archivo,clave) :
             return decrypted_data
         
     except Exception as ex:
-        # return False
-        # print(ex.args)
-        # return ex
+        return ex
         return {"status": "error", "message": "error.handler.desencriptar_archivoAESDome", "messageDetail":"{}".format(ex)}
-
-# def hello(event, context):
-#     body = {
-#         "message": "Ejecucion corr!",
-#         "input": event
-#     }
-
-#     response = {
-#         "statusCode": 200,
-#         "body": json.dumps(body,default = myconverter)
-#     }
-
-#     return response
-# def myconverter(o):
-#     if isinstance(o, datetime.datetime):
-#         return o.__str__()
-#     # Use this code if you don't use the http event with the LAMBDA-PROXY
-#     # integration
-#     """
-#     return {
-#         "message": "Go Serverless v1.0! Your function executed successfully!",
-#         "event": event
-#     }
-#     """
