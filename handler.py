@@ -39,7 +39,7 @@ def encriptar_transferir(key,origin_disc):
         
         else:
             # generamos el hash con la clave
-            clave=generar_claveDome(key)
+            clave=generar_clave_dome(key)
             if type(clave).__name__ !='bytes':
                 return clave
             # obtenemos los archivos de la carpeta de origen y recorremos para subir al bucket s3
@@ -50,7 +50,7 @@ def encriptar_transferir(key,origin_disc):
             lista_archivos_no_subidos=[]
             for elemento in contenidos:
                     # encriptamos el archivo
-                    encripted_archive_url=encriptar_archivoAESDome(origin_disc,elemento,clave)
+                    encripted_archive_url=encriptar_archivo_aes_dome(origin_disc,elemento,clave)
                     
                     if type(encripted_archive_url).__name__=='str':
                     # subimos los archivos al bucker s3
@@ -99,7 +99,7 @@ def decriptar_descargar(key1,destino):
             aws_secret_access_key = AWS_SECRET_ACCESS_KEY,
             region_name=REGION_NAME)
     try:
-        clave=generar_claveDome(key1)
+        clave=generar_clave_dome(key1)
         if type(clave).__name__ !='bytes':
             return clave
 
@@ -111,15 +111,15 @@ def decriptar_descargar(key1,destino):
             return {"status": error_mensaje, "message":ubicacion_mensaje, "messageDetail":"La carpeta de destino ("+destino+") no existe."}
     
         else:
-            list=s3.list_objects(Bucket=BUCKET)['Contents']
-            if len(list)==0:
+            lista_de_archivos=s3.list_objects(Bucket=BUCKET)['Contents']
+            if len(lista_de_archivos)==0:
                 return {"status": error_mensaje, "message":ubicacion_mensaje, "messageDetail":"No se encontraron archivos para descargar del bucket({})".format(BUCKET)}
            
             lista_archivos_erroneos=[]
-            for key in list:
+            for key in lista_de_archivos:
                     s3.download_file(BUCKET, key['Key'], destino+key['Key'])
                     if os.path.isfile(destino+key['Key']):
-                        rpt=desencriptar_archivoAESDome(destino+key['Key'],clave)
+                        rpt=desencriptar_archivo_aes_dome(destino+key['Key'],clave)
                         if rpt is not True:
                             lista_archivos_erroneos.append({"archivo":key['Key'],"motivo":"El archivo se descargo, pero no se desencripto(archivo corrupto o contrasenia invalida)"})                 
                     else:
@@ -136,9 +136,11 @@ def decriptar_descargar(key1,destino):
         return {"status": error_mensaje, "message": ubicacion_mensaje, "messageDetail":"Error de credenciales"}
     
     except  s3.exceptions.NoSuchBucket as ex:
+        print(ex)
         return {"status": error_mensaje, "message": ubicacion_mensaje, "messageDetail":"El bucket({}) no existe".format(BUCKET)}
     
     except  s3.exceptions.NoSuchKey as ex:
+        print(ex)
         return {"status": error_mensaje, "message": ubicacion_mensaje, "messageDetail":"No se encontro el archivo en el bucket({})".format(BUCKET)}
     
     except botocore.exceptions.ClientError as e:
@@ -150,10 +152,10 @@ def decriptar_descargar(key1,destino):
             return {"status": error_mensaje, "message": ubicacion_mensaje, "messageDetail":"El bucket({}) no existe".format(BUCKET)}
     
     except Exception as ex:
-        # return ex
+        print(ex)
         return {"status": error_mensaje, "message": ubicacion_mensaje, "messageDetail":ex.args}
 
-def generar_claveDome(key):
+def generar_clave_dome(key):
     try: 
         dome= AESDome('','')
         clave=dome.generarClave(key)
@@ -164,7 +166,7 @@ def generar_claveDome(key):
         print(ex.args)
         return {"status": "error", "message": "error.handler.generar_claveDome", "messageDetail":"Error al generar la clave."}
 
-def encriptar_archivoAESDome(ubicacion,nom_archivo,clave):
+def encriptar_archivo_aes_dome(ubicacion,nom_archivo,clave):
     try:
         aesDome=AESDome(clave,'')
         file=open(ubicacion+"/"+nom_archivo,"rb")
@@ -185,9 +187,9 @@ def encriptar_archivoAESDome(ubicacion,nom_archivo,clave):
 
     except Exception as ex:
         print(ex.args)
-        return {"status": "error", "message": "error.handler.encriptar_archivoAESDome", "messageDetail":"{}".format(ex)}
+        return {"status": "error", "message": "error.handler.encriptar_archivo_aes_dome", "messageDetail":"{}".format(ex)}
 
-def desencriptar_archivoAESDome(nom_archivo,clave) :
+def desencriptar_archivo_aes_dome(nom_archivo,clave) :
     try:
         file_in= open(nom_archivo,"rb")
         iv= file_in.read(16) 
@@ -207,4 +209,4 @@ def desencriptar_archivoAESDome(nom_archivo,clave) :
         
     except Exception as ex:
         return ex
-        return {"status": "error", "message": "error.handler.desencriptar_archivoAESDome", "messageDetail":"{}".format(ex)}
+        return {"status": "error", "message": "error.handler.desencriptar_archivo_aes_dome", "messageDetail":"{}".format(ex)}
