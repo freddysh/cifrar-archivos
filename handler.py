@@ -113,7 +113,8 @@ def descargarLocalBoto(key1,destino):
             return {"status": "success", "message":"success.handler.descargar_local_boto3", "messageDetail":"La carpeta de destino ("+destino+") no existe."}
     
         else:
-            if len(s3.list_objects(Bucket=bucket)['Contents'])==0:
+            list=s3.list_objects(Bucket=bucket)['Contents']
+            if len(list)==0:
                 return {"status": "success", "message":"success.handler.descargar_local_boto3", "messageDetail":"No se encontraron archivos para descargar del bucket({})".format(bucket)}
            
             lista_archivos_erroneos=[]
